@@ -131,8 +131,9 @@ class Service {
   }
 
   _find (params, count, getFilter = filter) {
-    const { filters, query } = getFilter(params.query || {});
+    const { filters } = getFilter(params.query || {});
     const q = params.knex || this.createQuery(params);
+    const q2 = q.clone();
 
     // Handle $limit
     if (filters.$limit) {
@@ -169,7 +170,7 @@ class Service {
     if (count) {
       let countQuery = this.db(params).count(`${this.id} as total`);
 
-      this.knexify(countQuery, query);
+      countQuery.from(q2.as(`${this.table}`));
 
       return countQuery.then(count => count[0].total).then(executeQuery);
     }
